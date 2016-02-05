@@ -26,7 +26,7 @@ plugin.tx_seobasics {
 	10.append < .5
 
 	20 < .10
-	20.wrap = <meta name="title" content="|" />
+	20.wrap = <meta name="title" content="|">
 
 
 	# Building the Keywords tag
@@ -36,7 +36,7 @@ plugin.tx_seobasics {
 	30.stdWrap.noTrimWrap = {$plugin.tx_seo.keywordsWrap}
 	30.stdWrap.stdWrap >
 	30.required = 1
-	30.wrap = <meta name="keywords" content="|" />
+	30.wrap = <meta name="keywords" content="|">
 
 
 	# Building the Description tag
@@ -44,7 +44,7 @@ plugin.tx_seobasics {
 	40 < .30
 	40.data = page:description
 	40.stdWrap.noTrimWrap = {$plugin.tx_seo.descriptionWrap}
-	40.wrap = <meta name="description" content="|" />
+	40.wrap = <meta name="description" content="|">
 
 
 	# Building the date tag (last changed)
@@ -53,7 +53,7 @@ plugin.tx_seobasics {
 	50.data = page:SYS_LASTCHANGED // page:crdate
 	50.date = Y-m-d
 	50.stdWrap >
-	50.wrap = <meta name="date" content="|" />
+	50.wrap = <meta name="date" content="|">
 
 	# Building the canonical tag
 	60 = TEXT
@@ -65,7 +65,7 @@ plugin.tx_seobasics {
 	60.required = 1
 	60.if.isTrue = {$plugin.tx_seo.enableCanonicalTag}
 	60.stdWrap >
-	60.wrap = <link rel="canonical" href="|" />
+	60.wrap = <link rel="canonical" href="|">
 
 	# add robots tag
 	70 = CASE
@@ -76,7 +76,7 @@ plugin.tx_seobasics {
 	70.2.value = noindex,follow
 	70.3 = TEXT
 	70.3.value = index,nofollow
-	70.stdWrap.wrap = <meta name="robots" content=" | " />
+	70.stdWrap.wrap = <meta name="robots" content=" | ">
 	70.stdWrap.append < .5
 }
 
