@@ -19,6 +19,18 @@ plugin.tx_seobasics {
 	10.stdWrap.stdWrap.append.required = 1
 	10.stdWrap.stdWrap.append.if.isTrue = {$plugin.tx_seo.titleWrapAppendSiteTitle}
 	10.stdWrap.stdWrap.append.noTrimWrap = | - ||
+
+	# Add this text between page title and site title
+	10.stdWrap.stdWrap.append.stdWrap.prepend = TEXT
+	10.stdWrap.stdWrap.append.stdWrap.prepend {
+		required = 1
+		noTrimWrap = || - |
+		value =
+		lang {
+			en =
+		}
+	}
+
 	10.stdWrap.noTrimWrap = {$plugin.tx_seo.titleWrap}
 	10.stdWrap.insertData = 1
 	10.htmlSpecialChars = 1
@@ -28,6 +40,9 @@ plugin.tx_seobasics {
 	20 < .10
 	20.wrap = <meta name="title" content="|">
 
+	# Add meta og:title
+	25 < .10
+	25.wrap = <meta property="og:title" content="|">
 
 	# Building the Keywords tag
 	30 = TEXT 
@@ -80,7 +95,6 @@ plugin.tx_seobasics {
 	70.stdWrap.append < .5
 }
 
-
 # activate SEO in main "page." configuration
 config.noPageTitle = 2
 page.headerData.776 = < plugin.tx_seobasics
@@ -98,3 +112,89 @@ tx_seo_xmlsitemaps {
 	10.userFunc = B13\SeoBasics\Controller\SitemapController->renderXMLSitemap
 	10.resolveMainShortcut = 1
 }
+
+
+# EXT:tt_products: change page title for products detail
+[globalVar = GP:tt_products|product>0]
+	plugin.tx_seobasics {
+		# add title field of the tt_products record prepended to seobasic title
+		10.stdWrap.stdWrap {
+			prepend = RECORDS
+			prepend {
+				source = {GP:tt_products|product}
+				source.insertData = 1
+				tables = tt_products
+				conf.tt_products >
+				conf.tt_products = TEXT
+				conf.tt_products.field = title
+			}
+			noTrimWrap = | - ||
+			# remove site title from <title>
+			append >
+		}
+
+		# re-copy .10 needed
+		20 < .10
+		# remove site title from <meta name="title"...
+		20.stdWrap.stdWrap.append >
+		# re-fix closing tag
+		20.wrap = <meta name="title" content="|">
+
+		# re-copy .10 needed
+		25 < .10
+		# remove site title from <meta property="og:title"...
+		25.stdWrap.stdWrap.append >
+		25.wrap = <meta property="og:title" content="|">
+
+		# description tag <start>
+		40 >
+		# first, copy title
+		40 < .10
+		# change wrap from title to meta description
+		40.wrap = <meta name="description" content="|">
+		# add "in vendita online a partire da <prezzo>"
+		40.stdWrap.stdWrap {
+			append = RECORDS
+			append {
+				source = {GP:tt_products|product}
+				source.insertData = 1
+				tables = tt_products
+				conf.tt_products >
+				conf.tt_products = TEXT
+				conf.tt_products {
+					field=price
+					stdWrap.numberFormat {
+						decimals = 2
+						dec_point = ,
+						thousands_sep = .
+					}
+				}
+				conf.tt_products.noTrimWrap = | in vendita online a partire da |€|
+			}
+		}
+		# description tag <end>
+	}
+[global]
+
+# EXT:ianshop: if product detail, don't use tx_seobasics title but use EXT:ianshop/../Show.html title cause it also set index_search title
+[globalVar = GP:tx_ianshop_productslist|item>0]
+#	config.noPageTitle = 0
+	plugin.tx_seobasics.5 >
+	plugin.tx_seobasics.10 >
+	plugin.tx_seobasics.11 >
+	plugin.tx_seobasics.20 >
+	plugin.tx_seobasics.21 >
+	plugin.tx_seobasics.25 >
+[GLOBAL]
+
+# if news detail, don't use tx_seobasics title but use EXT:news title
+[globalVar = GP:tx_news_pi1|news>0]
+	# restore TYPO3 <title> tag
+	config.noPageTitle = 0
+	plugin.tx_seobasics.5 >
+	plugin.tx_seobasics.10 >
+	plugin.tx_seobasics.11 >
+	plugin.tx_seobasics.20 >
+	plugin.tx_seobasics.21 >
+	plugin.tx_seobasics.25 >
+[GLOBAL]
