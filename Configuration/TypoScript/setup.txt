@@ -1,3 +1,14 @@
+# Add this text between page title and site title
+lib.textBetweenPageTitleAndSiteTitle = TEXT
+lib.textBetweenPageTitleAndSiteTitle {
+	required = 1
+	noTrimWrap = || - |
+	value =
+	lang {
+		en =
+	}
+}
+
 plugin.tx_seobasics >
 plugin.tx_seobasics = COA
 plugin.tx_seobasics {
@@ -19,18 +30,7 @@ plugin.tx_seobasics {
 	10.stdWrap.stdWrap.append.required = 1
 	10.stdWrap.stdWrap.append.if.isTrue = {$plugin.tx_seo.titleWrapAppendSiteTitle}
 	10.stdWrap.stdWrap.append.noTrimWrap = | - ||
-
-	# Add this text between page title and site title
-	10.stdWrap.stdWrap.append.stdWrap.prepend = TEXT
-	10.stdWrap.stdWrap.append.stdWrap.prepend {
-		required = 1
-		noTrimWrap = || - |
-		value =
-		lang {
-			en =
-		}
-	}
-
+	10.stdWrap.stdWrap.append.stdWrap.prepend = < lib.textBetweenPageTitleAndSiteTitle
 	10.stdWrap.noTrimWrap = {$plugin.tx_seo.titleWrap}
 	10.stdWrap.insertData = 1
 	10.htmlSpecialChars = 1
