@@ -170,6 +170,7 @@ tx_seo_xmlsitemaps {
 					}
 				}
 				conf.tt_products.noTrimWrap = | in vendita online a partire da |€|
+                stdWrap.if.isTrue = {$plugin.tt_products.displayPrices}
 			}
 		}
 		# description tag <end>
