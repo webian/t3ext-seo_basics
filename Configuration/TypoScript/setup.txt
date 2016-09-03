@@ -2,7 +2,8 @@
 lib.textBetweenPageTitleAndSiteTitle = TEXT
 lib.textBetweenPageTitleAndSiteTitle {
 	required = 1
-	noTrimWrap = || - |
+	noTrimWrap = ¦¦ | ¦
+	noTrimWrap.splitChar = ¦
 	value =
 	lang {
 		en =
@@ -29,7 +30,8 @@ plugin.tx_seobasics {
 	10.stdWrap.stdWrap.append.trim = 1
 	10.stdWrap.stdWrap.append.required = 1
 	10.stdWrap.stdWrap.append.if.isTrue = {$plugin.tx_seo.titleWrapAppendSiteTitle}
-	10.stdWrap.stdWrap.append.noTrimWrap = | - ||
+	10.stdWrap.stdWrap.append.noTrimWrap = ¦ | ¦¦
+	10.stdWrap.stdWrap.append.noTrimWrap.splitChar = ¦
 	10.stdWrap.stdWrap.append.stdWrap.prepend = < lib.textBetweenPageTitleAndSiteTitle
 	10.stdWrap.noTrimWrap = {$plugin.tx_seo.titleWrap}
 	10.stdWrap.insertData = 1
@@ -128,7 +130,8 @@ tx_seo_xmlsitemaps {
 				conf.tt_products = TEXT
 				conf.tt_products.field = title
 			}
-			noTrimWrap = | - ||
+			noTrimWrap = ¦ | ¦¦
+			noTrimWrap.splitChar = ¦
 			# remove site title from <title>
 			append >
 		}
