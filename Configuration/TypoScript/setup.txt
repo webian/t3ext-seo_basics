@@ -114,6 +114,8 @@ plugin.tx_seobasics {
 	70.3.value = index,nofollow
 	70.stdWrap.wrap = <meta name="robots" content=" | ">
 	70.stdWrap.append < .5
+    # !ian: disable robots cause I use BP global robots
+    70 >
 }
 [globalVar = TSFE:id = 1]
 	# For home page we can't exclude the page itself
