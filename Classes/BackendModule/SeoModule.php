@@ -424,7 +424,7 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			'page_id, language_id, pagepath',
-			'tx_realurl_pathcache',
+			'tx_realurl_pathdata',
 			'page_id IN ('. $uidList .') ' . $where,
 			'',
 			'language_id ASC, expire ASC'
