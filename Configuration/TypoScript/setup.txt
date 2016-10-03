@@ -23,7 +23,9 @@ plugin.tx_seobasics {
 
 	10 = COA
 	10 {
-		wrap = <title>|</title>
+		# use stdWrap and not simple wrap cause I need to crop the content inside the HTML tag
+		stdWrap.wrap = <title>|</title>
+		stdWrap.crop = 150||1
 		htmlSpecialChars = 1
 		stdWrap.noTrimWrap = {$plugin.tx_seo.titleWrap}
 		stdWrap.insertData = 1
@@ -58,42 +60,38 @@ plugin.tx_seobasics {
 		stdWrap.append < plugin.tx_seobasics.5
 	}
 
-	20 < .10
-	20.wrap = <meta name="title" content="|">
+	20 =< plugin.tx_seobasics.10
+	20.stdWrap.wrap = <meta name="title" content="|">
 
 	# Add meta og:title
-	25 < .10
-	25.wrap = <meta property="og:title" content="|">
+	25 =< plugin.tx_seobasics.10
+	25.stdWrap.wrap = <meta property="og:title" content="|">
 
 	# Building the Keywords tag
 	30 = TEXT
 	30.data = page:keywords
-	30.stdWrap.noTrimWrap = {$plugin.tx_seo.keywordsWrap}
-	30.stdWrap.stdWrap >
-	30.required = 1
-	30.wrap = <meta name="keywords" content="|">
-	30.append < plugin.tx_seobasics.5
-
+	30.stdWrap {
+		noTrimWrap = {$plugin.tx_seo.keywordsWrap}
+		required = 1
+		wrap = <meta name="keywords" content="|">
+		append < plugin.tx_seobasics.5
+	}
 
 	# Building the Description tag
-	40 = TEXT
-	40 < .30
+	40 =< plugin.tx_seobasics.30
 	40.data = page:description
 	40.stdWrap.noTrimWrap = {$plugin.tx_seo.descriptionWrap}
-	40.wrap = <meta name="description" content="|">
-
+	40.stdWrap.wrap = <meta name="description" content="|">
 
 	# Building the date tag (last changed)
 	50 = TEXT
-	50 < .30
 	50.data = page:SYS_LASTCHANGED // page:crdate
 	50.date = Y-m-d
-	50.stdWrap >
 	50.wrap = <meta name="date" content="|">
+	50.append < plugin.tx_seobasics.5
 
 	# Building the canonical tag
-	60 = TEXT
-	60 < .30
+	60 =< plugin.tx_seobasics.30
 	60.data >
 	60.cObject = USER
 	60.cObject.userFunc = B13\SeoBasics\Service\UrlService->getCanonicalUrl
@@ -101,7 +99,7 @@ plugin.tx_seobasics {
 	60.required = 1
 	60.if.isTrue = {$plugin.tx_seo.enableCanonicalTag}
 	60.stdWrap >
-	60.wrap = <link rel="canonical" href="|">
+	60.stdWrap.wrap = <link rel="canonical" href="|">
 
 	# add robots tag
 	70 = CASE
@@ -114,8 +112,8 @@ plugin.tx_seobasics {
 	70.3.value = index,nofollow
 	70.stdWrap.wrap = <meta name="robots" content=" | ">
 	70.stdWrap.append < .5
-    # !ian: disable robots cause I use BP global robots
-    70 >
+	# !ian: disable robots cause I use BP global robots
+	70 >
 }
 [globalVar = TSFE:id = 1]
 	# For home page we can't exclude the page itself
@@ -163,18 +161,11 @@ tx_seo_xmlsitemaps {
 			20 >
 		}
 
-		# re-copy .10 needed
-		20 < .10
 		# remove site title from <meta name="title"...
 		20.20 >
-		# re-fix closing tag
-		20.wrap = <meta name="title" content="|">
 
-		# re-copy .10 needed
-		25 < .10
 		# remove site title from <meta property="og:title"...
 		25.20 >
-		25.wrap = <meta property="og:title" content="|">
 
 		# description tag <start>
 		40 >
@@ -186,7 +177,7 @@ tx_seo_xmlsitemaps {
 		40.10 >
 		40.20 >
 		# change wrap from title to meta description
-		40.wrap = <meta name="description" content="|">
+		40.stdWrap.wrap = <meta name="description" content="|">
 		# add "in vendita online a partire da <prezzo>"
 		40.10 = RECORDS
 		40.10 {
@@ -221,7 +212,23 @@ tx_seo_xmlsitemaps {
 	plugin.tx_seobasics.25 >
 [GLOBAL]
 
-# if news detail, don't use tx_seobasics title but use EXT:news title
+# EXT:news: pagination
+[globalVar = GP:tx_news_pi1|@widget_0|currentPage>0]
+	plugin.tx_seobasics {
+		# add page number at the begin of page title
+		10 {
+			5 >
+			5 = TEXT
+			5 {
+				data = GP:tx_news_pi1|@widget_0|currentPage
+				noTrimWrap = ¦¦ | ¦
+				noTrimWrap.splitChar = ¦
+			}
+		}
+	}
+[global]
+
+# EXT:news: detail, don't use tx_seobasics title but use EXT:news title
 [globalVar = GP:tx_news_pi1|news>0]
 	# restore TYPO3 <title> tag
 	config.noPageTitle = 0
@@ -232,3 +239,135 @@ tx_seo_xmlsitemaps {
 	plugin.tx_seobasics.21 >
 	plugin.tx_seobasics.25 >
 [GLOBAL]
+
+# EXT:cal: month view
+[globalVar = GP:tx_cal_controller|year>0] && [globalVar = GP:tx_cal_controller|month>0]
+	plugin.tx_seobasics {
+		# add title field of the tt_products record
+		10 {
+			5 >
+			5 = COA
+			5 {
+				10 = TEXT
+				10.data = GP:tx_cal_controller|month
+				10.wrap = |/
+				20 = TEXT
+				20.data = GP:tx_cal_controller|year
+				stdWrap.noTrimWrap = ¦¦ | ¦
+				stdWrap.noTrimWrap.splitChar = ¦
+			}
+		}
+	}
+[global]
+
+# EXT:cal: event detail
+[globalVar = GP:tx_cal_controller|uid>0]
+	plugin.tx_seobasics {
+		# add title field of the cal record
+		10 {
+			5 >
+			5 = RECORDS
+			5 {
+				source = {GP:tx_cal_controller|uid}
+				source.insertData = 1
+				tables = tx_cal_event
+				conf.tx_cal_event >
+				conf.tx_cal_event = TEXT
+				conf.tx_cal_event.field = title
+				conf.tx_cal_event.noTrimWrap = ¦¦ | ¦
+				conf.tx_cal_event.noTrimWrap.splitChar = ¦
+			}
+			6 = COA
+			6 {
+				5 = TEXT
+				5.data = GP:tx_cal_controller|day
+				5.wrap = |/
+				10 = TEXT
+				10.data = GP:tx_cal_controller|month
+				10.wrap = |/
+				20 = TEXT
+				20.data = GP:tx_cal_controller|year
+				stdWrap.noTrimWrap = ¦¦ | ¦
+				stdWrap.noTrimWrap.splitChar = ¦
+			}
+
+			# reduce the rootline removing the last part
+			10.special.range = 2|-1
+			# remove final |
+			10.stdWrap.substring = 0,-3
+
+			# remove site title from <title>
+			20 >
+		}
+	}
+[global]
+
+# EXT:facebook_stream: pagination
+[globalVar = GP:tx_facebookstream_pi1|@widget_0|currentPage>0]
+	plugin.tx_seobasics {
+		# add page number at the begin of page title
+		10 {
+			5 >
+			5 = TEXT
+			5 {
+				data = GP:tx_facebookstream_pi1|@widget_0|currentPage
+				noTrimWrap = ¦¦ | ¦
+				noTrimWrap.splitChar = ¦
+			}
+		}
+	}
+[global]
+
+#tx_facebookstream_pi1[post]=281&tx_facebookstream_pi1[action]=showSinglePost&tx_facebookstream_pi1[controller]=Page
+
+# EXT:cal: event detail
+[globalVar = GP:tx_facebookstream_pi1|post>0]
+	plugin.tx_seobasics {
+		# add title field of the cal record
+		10 {
+			5 >
+			5 = RECORDS
+			5 {
+				source = {GP:tx_facebookstream_pi1|post}
+				source.insertData = 1
+				tables = tx_facebookstream_domain_model_post
+				conf.tx_facebookstream_domain_model_post >
+				conf.tx_facebookstream_domain_model_post = COA
+				conf.tx_facebookstream_domain_model_post {
+					10 = TEXT
+					10 {
+						field = name
+						required = 1
+						stdWrap {
+							replacement {
+								10 {
+									search = <br/>
+									replace.char = 32
+								}
+								20 {
+									search = #
+									replace =
+								}
+							}
+							stripHtml = 1
+						}
+						noTrimWrap = ¦¦ | ¦
+						noTrimWrap.splitChar = ¦
+					}
+					20 < .10
+					20.field = message
+				}
+				# remove final |
+				stdWrap.substring = 0,-3
+			}
+
+			# reduce the rootline removing the last part
+			10.special.range = 2|-1
+			# remove final |
+			10.stdWrap.substring = 0,-3
+
+			# remove site title from <title>
+			20 >
+		}
+	}
+[global]
