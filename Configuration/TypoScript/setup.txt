@@ -26,7 +26,7 @@ plugin.tx_seobasics {
 		# use stdWrap and not simple wrap cause I need to crop the content inside the HTML tag
 		stdWrap.wrap = <title>|</title>
 		stdWrap.crop = 150||1
-		htmlSpecialChars = 1
+		stdWrap.htmlSpecialChars = 1
 		stdWrap.noTrimWrap = {$plugin.tx_seo.titleWrap}
 		stdWrap.insertData = 1
 
@@ -60,12 +60,9 @@ plugin.tx_seobasics {
 		stdWrap.append < plugin.tx_seobasics.5
 	}
 
-	20 =< plugin.tx_seobasics.10
-	20.stdWrap.wrap = <meta name="title" content="|">
-
 	# Add meta og:title
-	25 =< plugin.tx_seobasics.10
-	25.stdWrap.wrap = <meta property="og:title" content="|">
+	20 =< plugin.tx_seobasics.10
+	20.stdWrap.wrap = <meta property="og:title" content="|">
 
 	# Building the Keywords tag
 	30 = TEXT
@@ -74,6 +71,7 @@ plugin.tx_seobasics {
 		noTrimWrap = {$plugin.tx_seo.keywordsWrap}
 		required = 1
 		wrap = <meta name="keywords" content="|">
+		htmlSpecialChars = 1
 		append < plugin.tx_seobasics.5
 	}
 
@@ -115,6 +113,7 @@ plugin.tx_seobasics {
 	# !ian: disable robots cause I use BP global robots
 	70 >
 }
+
 [globalVar = TSFE:id = 1]
 	# For home page we can't exclude the page itself
 	plugin.tx_seobasics.10.10.special.range >
@@ -198,6 +197,10 @@ tx_seo_xmlsitemaps {
 			stdWrap.if.isTrue = {$plugin.tt_products.displayPrices}
 		}
 		# description tag <end>
+
+		# og:description
+		1100 < plugin.tx_seobasics.10
+		1100.stdWrap.wrap = <meta property="og:description" content="|">
 	}
 [global]
 
