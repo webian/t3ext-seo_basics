@@ -168,39 +168,56 @@ tx_seo_xmlsitemaps {
 
 		# description tag <start>
 		40 >
-		# first, copy title
-		40 < plugin.tx_seobasics.10
-		# remove pipe after product title
-		40.5.conf.tt_products.noTrimWrap = ¦¦¦
-		# remove reverse rootline and site name
-		40.10 >
-		40.20 >
-		# change wrap from title to meta description
-		40.stdWrap.wrap = <meta name="description" content="|">
-		# add "in vendita online a partire da <prezzo>"
-		40.10 = RECORDS
-		40.10 {
-			source = {GP:tt_products|product}
-			source.insertData = 1
-			tables = tt_products
-			conf.tt_products >
-			conf.tt_products = TEXT
-			conf.tt_products {
-				field=price
-				stdWrap.numberFormat {
-					decimals = 2
-					dec_point = ,
-					thousands_sep = .
-				}
+		40 = COA
+		40 {
+			stdWrap {
+				wrap = <meta name="description" content="|…">
+				crop = 150||1
+				htmlSpecialChars = 1
+				insertData = 1
+				append < plugin.tx_seobasics.5
 			}
-			conf.tt_products.noTrimWrap = | in vendita online a partire da |€|
-			stdWrap.if.isTrue = {$plugin.tt_products.displayPrices}
+
+			# add "in vendita online a partire da <prezzo>"
+			10 = RECORDS
+			10 {
+				source = {GP:tt_products|product}
+				source.insertData = 1
+				tables = tt_products
+				conf.tt_products >
+				conf.tt_products = TEXT
+				conf.tt_products {
+					field = price
+					stdWrap.numberFormat {
+						decimals = 2
+						dec_point = ,
+						thousands_sep = .
+					}
+					noTrimWrap = |In vendita online a partire da |€. |
+				}
+				stdWrap.if.isTrue = {$plugin.tt_products.displayPrices}
+			}
+
+			# Get record description
+			20 < plugin.tx_seobasics.40.10
+			20 {
+				conf.tt_products >
+				conf.tt_products = TEXT
+				conf.tt_products {
+					field = note
+					noTrimWrap = |||
+				}
+				stdWrap.if >
+				stdWrap.stripHtml = 1
+			}
 		}
+
+
 		# description tag <end>
 
 		# og:description
-		1100 < plugin.tx_seobasics.10
-		1100.stdWrap.wrap = <meta property="og:description" content="|">
+		1100 < plugin.tx_seobasics.40
+		1100.stdWrap.wrap = <meta property="og:description" content="|…">
 	}
 [global]
 
