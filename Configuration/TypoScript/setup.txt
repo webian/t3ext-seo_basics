@@ -76,10 +76,20 @@ plugin.tx_seobasics {
 	}
 
 	# Building the Description tag
-	40 =< plugin.tx_seobasics.30
+	40 = TEXT
 	40.data = page:description
-	40.stdWrap.noTrimWrap = {$plugin.tx_seo.descriptionWrap}
-	40.stdWrap.wrap = <meta name="description" content="|">
+	40.stdWrap {
+		noTrimWrap = {$plugin.tx_seo.descriptionWrap}
+		required = 1
+		crop = 150||1
+		wrap = <meta name="description" content="|…">
+		htmlSpecialChars = 1
+		append < plugin.tx_seobasics.5
+	}
+	# og:description
+	45 < plugin.tx_seobasics.40
+	45.stdWrap.wrap = <meta property="og:description" content="|…">
+
 
 	# Building the date tag (last changed)
 	50 = TEXT
@@ -211,13 +221,13 @@ tx_seo_xmlsitemaps {
 				stdWrap.stripHtml = 1
 			}
 		}
-
+		# og:description
+        45 >
+		45 < plugin.tx_seobasics.40
+		45.stdWrap.wrap = <meta property="og:description" content="|…">
 
 		# description tag <end>
 
-		# og:description
-		1100 < plugin.tx_seobasics.40
-		1100.stdWrap.wrap = <meta property="og:description" content="|…">
 	}
 [global]
 
