@@ -27,6 +27,8 @@ namespace B13\SeoBasics\BackendModule;
  *  THE SOFTWARE.
  ***************************************************************/
 
+use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 
@@ -61,6 +63,12 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 	 * @var array
 	 */
 	protected $pathCaches   = array();
+
+
+    /**
+     * @var IconFactory
+     */
+    protected $iconFactory;
 
 	/**
 	 * Does some initial work for the page
@@ -134,8 +142,14 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 
 
 			// Add Javascript
-			$this->pObj->doc->getPageRenderer()->loadJquery();
-			$this->pObj->doc->getPageRenderer()->addJsFile(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('seo_basics') . 'Resources/Public/JavaScript/SeoModule.js');
+            if (version_compare(TYPO3_version, '7.6', '>')) {
+                $this->getPageRenderer()->loadJquery();
+                $this->getPageRenderer()->addJsFile(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::siteRelPath('seo_basics') . 'Resources/Public/JavaScript/SeoModule.js');
+            } else {
+                $this->pObj->doc->getPageRenderer()->loadJquery();
+                $this->pObj->doc->getPageRenderer()->addJsFile(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('seo_basics') . 'Resources/Public/JavaScript/SeoModule.js');
+            }
+
 
 
 			// render depth selector
@@ -176,7 +190,12 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 
 
 			// Creating top icon; the current page
-			$HTML = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord('pages', $treeStartingRecord);
+            if (version_compare(TYPO3_version, '8.0', '<')) {
+                $HTML = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord('pages', $treeStartingRecord);
+            } else {
+                $HTML = $this->getIconFactory()->getIcon('apps-pagetree-page-default', \TYPO3\CMS\Core\Imaging\Icon::SIZE_SMALL);
+            }
+
 			$tree->tree[] = array(
 				'row' => $treeStartingRecord,
 				'HTML' => $HTML
@@ -359,7 +378,13 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 		}
 
 		if ($this->hasAvailableLanguages) {
-			array_unshift($row1, '<td ' . ($cmd == 'edit' ? 'rowspan="2"' : '').'>' . \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIcon($this->sysLanguages[$item['sys_language']]['flagIcon']) . '</td>');
+            if (version_compare(TYPO3_version, '8.0', '<')) {
+                $icon = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIcon($this->sysLanguages[$item['sys_language']]['flagIcon']);
+            } else {
+                $icon = $this->getIconFactory()->getIcon($this->sysLanguages[$item['sys_language']]['flagIcon'], \TYPO3\CMS\Core\Imaging\Icon::SIZE_SMALL);
+            }
+
+			array_unshift($row1, '<td ' . ($cmd == 'edit' ? 'rowspan="2"' : '').'>' . $icon . '</td>');
 		}
 		if ($rowTitle) {
 			array_unshift($row1, $rowTitle);
@@ -424,7 +449,7 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			'page_id, language_id, pagepath',
-			'tx_realurl_pathdata',
+			version_compare(ExtensionManagementUtility::getExtensionVersion('realurl'), '2.0', '<') ? 'tx_realurl_pathcache' : 'tx_realurl_pathdata',
 			'page_id IN ('. $uidList .') ' . $where,
 			'',
 			'language_id ASC, expire ASC'
@@ -529,4 +554,16 @@ class SeoModule extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 			}
 		}
 	}
+
+	/**
+     * @return IconFactory
+     */
+    public function getIconFactory()
+    {
+        if ($this->iconFactory === null) {
+            $this->iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+        }
+
+        return $this->iconFactory;
+    }
 }
